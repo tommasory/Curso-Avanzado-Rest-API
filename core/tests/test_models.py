@@ -29,3 +29,16 @@ class ModelTest(TestCase):
         # Deberia validar que se levante una excepcion si no se pasa el email
         with self.assertRaises(ValueError):
             get_user_model().objects.create_user(None,'DataScience2021')
+            
+    def test_new_superuser(self):
+        """ Probar super usuario creado """
+        email = 'test@unicauca.edu.co'
+        password = 'DataScience2021'
+
+        user = get_user_model().objects.create_superuser(
+            email = email,
+            password = password
+        )
+        
+        self.assertTrue(user.is_superuser)
+        self.assertTrue(user.is_staff)

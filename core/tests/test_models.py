@@ -23,3 +23,9 @@ class ModelTest(TestCase):
         user = get_user_model().objects.create_user(email,'DataScience2021')
 
         self.assertEqual(user.email, email.lower())
+
+    def test_new_user_invalid_email(self):
+        """ Nuevo usuario email invalidado """
+        # Deberia validar que se levante una excepcion si no se pasa el email
+        with self.assertRaises(ValueError):
+            get_user_model().objects.create_user(None,'DataScience2021')

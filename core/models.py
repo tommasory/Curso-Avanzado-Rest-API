@@ -4,7 +4,9 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin
 )
+from django.db.models.fields.related import ForeignKey
 
+from django.conf import settings
 
 class UserManager(BaseUserManager):
 
@@ -29,8 +31,6 @@ class UserManager(BaseUserManager):
 
         return user
 
-        
-
 class User(AbstractBaseUser, PermissionsMixin):
     """ Modelo personalidad de usuario que soporta hacer login con Email en lugar de usuario """
 
@@ -43,5 +43,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
 
+class Tag(models.Model):
+    """ Modelo del Tag para receta """
+    name  = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        self.name
+    
 
 

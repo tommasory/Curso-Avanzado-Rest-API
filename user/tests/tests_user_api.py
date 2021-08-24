@@ -51,7 +51,8 @@ class PublicUserApiTests(TestCase):
         """ La contraseña debe ser mayor a 5 caracteres """
         payload = {
             'email':'test@gmail.com',
-            'password':'pw'
+            'password':'pw',
+            'name':'Test name'
         }
 
         res = self.client.post(CREATE_USER_URL, payload)

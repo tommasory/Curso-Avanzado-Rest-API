@@ -52,7 +52,7 @@ class Tag(models.Model):
     )
 
     def __str__(self):
-        self.name
+        return self.name
     
 
 

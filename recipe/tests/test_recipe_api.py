@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.test.utils import tag
 from django.urls import reverse
 from django.test import TestCase
 
@@ -9,7 +10,7 @@ from core.models import Recipe, Tag, Ingredient
 
 from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
 
-RECIPE_URL = reverse('recipe:recipe-list')
+RECIPES_URL = reverse('recipe:recipe-list')
 
 def sample_tag(user, name='Main course'):
     """ Crea Tag de ejemplo """
@@ -50,7 +51,7 @@ class PublicRecipeApiTests(TestCase):
         sample_recipe(user=self.user)
         sample_recipe(user=self.user)
 
-        res = self.client.get(RECIPE_URL)
+        res = self.client.get(RECIPES_URL)
 
         recipes = Recipe.objects.all().order_by('id')
         serializer = RecipeSerializer(recipes, many=True)
@@ -67,7 +68,7 @@ class PublicRecipeApiTests(TestCase):
         sample_recipe(user=user2)
         sample_recipe(user=self.user)
 
-        res = self.client.get(RECIPE_URL)
+        res = self.client.get(RECIPES_URL)
 
         recipes = Recipe.objects.filter(user=self.user)
         serializer = RecipeSerializer(recipes, many=True)
@@ -87,6 +88,62 @@ class PublicRecipeApiTests(TestCase):
         serializer = RecipeDetailSerializer(recipe)
         self.assertEqual(res.data, serializer.data)
 
-#class PrivateRecipeApiTests(TestCase):
-#    """ Test acceso autenticado al API """
+    def test_create_basic_recipe(self):
+        """ Probar crear receta """
+        payload = {
+            'title':'Test recipe',
+            'time_minutes':30,
+            'price':10.00
+        }
+
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        for key in payload.keys():
+            self.assertEqual(payload[key], getattr(recipe, key))
+        
+    def test_create_recipe_with_tags(self):
+        """ Prueba crear recetas con Tag """
+        tag1 = sample_tag(user=self.user, name='Tag 1')
+        tag2 = sample_tag(user=self.user, name='Tag 2')
+        payload = {
+            'title':'Test recipe with two tags',
+            'tags':[tag1.id, tag2.id],
+            'time_minutes':30,
+            'price':10.00
+        }
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        tags = recipe.tags.all()
+        self.assertEqual(tags.count(), 2)
+        self.assertIn(tag1, tags)
+        self.assertIn(tag2, tags)
+
+    def test_create_recipe_with_ingredients(self):
+        """ Prueba crear recetas con Ingredientes"""
+        ingredient1 = sample_ingredient(user=self.user, name='Ingredient 1')
+        ingredient2 = sample_ingredient(user=self.user, name='Ingredient 2')
+        payload = {
+            'title':'Test recipe with two tags',
+            'ingredients':[ingredient1.id, ingredient2.id],
+            'time_minutes':30,
+            'price':10.00
+        }
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        ingredients = recipe.ingredients.all()
+        self.assertEqual(ingredients.count(), 2)
+        self.assertIn(ingredient1, ingredients)
+        self.assertIn(ingredient2, ingredients)
+
+
+
+
+
+
     

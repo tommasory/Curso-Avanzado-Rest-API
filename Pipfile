@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 djangorestframework = "~=3.12"
+pillow = "~=8.3"
 
 [dev-packages]
 
